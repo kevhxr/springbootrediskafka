@@ -1,0 +1,21 @@
+#默认使用配置
+spring:
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:sqlserver://PC201401120046:1433;DatabaseName=XrLearn
+    username: xiaoran1
+    password: 2222
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+  #公共配置与profiles选择无关
+mybatis:
+    mapper-locations: classpath:mapper/*.xml
+    type-aliases-package: com.hxr.springrediskafka.entity
+    config-location: classpath:mybatis-config.xml
+
+server:
+  #端口号
+  port: 8888
+
+
