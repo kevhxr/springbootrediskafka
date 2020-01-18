@@ -6,6 +6,11 @@
     <select id="findAllUsers" resultMap="collectionMap">
         select * from dbo.Base_Users;
     </select>
-
+    <resultMap id="collectionMap" type="UserBean">
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="user_age" property="userAge" jdbcType="INTEGER"/>
+        <result column="user_alias" property="userAlias" jdbcType="VARCHAR"/>
+    </resultMap>
 
 </mapper>
