@@ -1,7 +1,10 @@
 package redisTest;
 
-public class User {
+import java.io.Serializable;
 
+public class User implements Serializable {
+
+    private static final long serialVersionUID = -947365066279264121L;
     private String name;
     private Integer id;
     private Integer age;

@@ -2,9 +2,11 @@ package com.hxr.springrediskafka.controller;
 
 
 import com.hxr.springrediskafka.entity.UserBean;
+import com.hxr.springrediskafka.service.RedisServiceImpl;
 import com.hxr.springrediskafka.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -21,6 +23,10 @@ public class TestController {
 
     @Resource(name = "userServiceImpl")
     private UserService userService;
+
+    @Autowired
+    RedisServiceImpl redisService;
+
     @RequestMapping("/get")
     @ResponseBody
     public String getTest() {
@@ -36,5 +42,11 @@ public class TestController {
         logger.info("findallusers==========");
         List<UserBean> users = userService.findAllUser();
         return users;
+    }
+
+
+    @RequestMapping(value = "/redis/add")
+    public void addToRedis() {
+        redisService.addNewKey();
     }
 }

@@ -23,12 +23,20 @@ spring:
     time-between-eviction-runs-millis: 18800
     # 配置一个连接在池中最小生存的时间，单位是毫秒
     minEvictableIdleTimeMillis: 300000
+  redis:
+    host: 192.168.1.101
+    port: 6379
+    max-idle: 1
+    max-total: 5
+    password: 1234
 
   #公共配置与profiles选择无关
 mybatis:
     mapper-locations: classpath:mapper/*.xml
     type-aliases-package: com.hxr.springrediskafka.entity
     config-location: classpath:mybatis-config.xml
+
+
 
 server:
   #端口号

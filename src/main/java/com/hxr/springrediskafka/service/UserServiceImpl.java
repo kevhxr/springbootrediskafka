@@ -9,7 +9,6 @@ import java.util.List;
 
 @Service(value = "userServiceImpl")
 public class UserServiceImpl implements UserService {
-
     @Autowired
     private UserMapper userMapper;
 
@@ -17,6 +16,5 @@ public class UserServiceImpl implements UserService {
     public List<UserBean> findAllUser() {
         return userMapper.findAllUsers();
     }
-
 
 }

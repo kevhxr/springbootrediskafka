@@ -1,7 +1,10 @@
 package com.hxr.springrediskafka.entity;
 
-public class UserBean {
+import java.io.Serializable;
 
+public class UserBean implements Serializable {
+
+    private static final long serialVersionUID = 7651429617189991228L;
     private String userName;
     private int userId;
     private int userAge;
