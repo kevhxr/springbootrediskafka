@@ -45,8 +45,4 @@ public class TestController {
     }
 
 
-    @RequestMapping(value = "/redis/add")
-    public void addToRedis() {
-        redisService.addNewKey();
-    }
 }
