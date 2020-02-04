@@ -23,6 +23,12 @@ spring:
     time-between-eviction-runs-millis: 18800
     # 配置一个连接在池中最小生存的时间，单位是毫秒
     minEvictableIdleTimeMillis: 300000
+    hikari:
+      minimum-idle: 5
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+      pool-name: MyHikariCP
+      auto-commit: true
   redis:
     host: 192.168.1.101
     port: 6379
@@ -35,8 +41,9 @@ mybatis:
     mapper-locations: classpath:mapper/*.xml
     type-aliases-package: com.hxr.springrediskafka.entity
     config-location: classpath:mybatis-config.xml
-
-
+kafka:
+  bootstartp-servers: node01:9092,node02:9092,node03:9092
+  topics: tp01
 
 server:
   #端口号
