@@ -1,7 +1,8 @@
 package com.hxr.springrediskafka.controller;
 
+import com.hxr.springrediskafka.config.ConditionalOnSystemProperty;
 import com.hxr.springrediskafka.entity.RedisUser;
-import com.hxr.springrediskafka.service.RedisServiceImpl;
+import com.hxr.springrediskafka.service.redis.RedisServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,10 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/redis")
+@ConditionalOnSystemProperty(name = "mode", value = "Prod")
 public class RedisController {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DAOController.class);
 
     @Autowired
     RedisServiceImpl redisService;

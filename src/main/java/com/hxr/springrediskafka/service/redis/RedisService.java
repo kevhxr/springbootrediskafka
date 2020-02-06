@@ -1,10 +1,12 @@
-package com.hxr.springrediskafka.service;
+package com.hxr.springrediskafka.service.redis;
 
 import com.hxr.springrediskafka.entity.RedisUser;
 
 import java.util.Map;
 
 public interface RedisService {
+
+    public static String serviceName="REDISNAME";
 
     void addNewKey();
 

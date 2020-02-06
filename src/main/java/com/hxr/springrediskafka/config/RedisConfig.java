@@ -12,6 +12,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
+@ConditionalOnSystemProperty(name = "mode", value = "Prod")
 public class RedisConfig {
 
     @Bean

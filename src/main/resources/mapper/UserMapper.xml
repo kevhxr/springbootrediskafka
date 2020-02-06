@@ -13,4 +13,8 @@
         <result column="user_alias" property="userAlias" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <insert id="insertUser" parameterType="UserBean">
+        insert into dbo.Base_Users values(#{userName},#{userAge},#{userAlias})
+    </insert>
+
 </mapper>

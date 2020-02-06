@@ -1,4 +1,4 @@
-package com.hxr.springrediskafka.config;
+package com.hxr.springrediskafka.util;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;

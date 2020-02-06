@@ -2,12 +2,11 @@ package com.hxr.springrediskafka.controller;
 
 
 import com.hxr.springrediskafka.entity.UserBean;
-import com.hxr.springrediskafka.service.RedisServiceImpl;
 import com.hxr.springrediskafka.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -17,21 +16,18 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/test")
-public class TestController {
+public class DAOController {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DAOController.class);
 
     @Resource(name = "userServiceImpl")
     private UserService userService;
-
-    @Autowired
-    RedisServiceImpl redisService;
 
     @RequestMapping("/get")
     @ResponseBody
     public String getTest() {
         String testStr = "doing test";
-        logger.info("test!!!!!!!! {}", testStr);
+            logger.info("test!!!!!!!! {}", testStr);
         return testStr;
     }
 
@@ -42,6 +38,23 @@ public class TestController {
         logger.info("findallusers==========");
         List<UserBean> users = userService.findAllUser();
         return users;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/add/{userName}/{userAlias}/{userAge}")
+    public int insertUser(
+            @PathVariable("userName") String userName,
+            @PathVariable("userAlias") String userAlias,
+            @PathVariable("userAge") int userAge) throws Exception {
+        logger.info("going to insert User==========");
+
+        UserBean userBean = new UserBean();
+        userBean.setUserName(userName);
+        userBean.setUserAge(userAge);
+        userBean.setUserAlias(userAlias);
+        int insertRowNum = userService.insertUser(userBean);
+        logger.info("successfully insert User==========" + userBean.toString());
+        return insertRowNum;
     }
 
 

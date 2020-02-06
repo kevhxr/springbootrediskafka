@@ -7,4 +7,6 @@ import java.util.List;
 public interface UserService {
 
     List<UserBean> findAllUser();
+
+    int insertUser(UserBean userBean);
 }

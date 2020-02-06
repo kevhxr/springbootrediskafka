@@ -11,7 +11,6 @@ import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -19,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@ConditionalOnSystemProperty(name = "mode", value = "Prod")
 @ConfigurationProperties(prefix = "kafka")
 public class KafkaReceiver implements ConsumerSeekAware {
 
@@ -32,9 +32,7 @@ public class KafkaReceiver implements ConsumerSeekAware {
 
     @Override
     public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekCallback callback) {
-        assignments.entrySet().forEach(assignment -> {
-            logger.info("onPartitionsAssigned {},{}", assignment.getKey(), assignment.getValue());
-        });
+        assignments.entrySet().forEach(assignment -> logger.info("onPartitionsAssigned {},{}", assignment.getKey(), assignment.getValue()));
     }
 
     @Override

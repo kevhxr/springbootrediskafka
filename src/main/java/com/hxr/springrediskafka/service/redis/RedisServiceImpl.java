@@ -1,5 +1,6 @@
-package com.hxr.springrediskafka.service;
+package com.hxr.springrediskafka.service.redis;
 
+import com.hxr.springrediskafka.config.ConditionalOnSystemProperty;
 import com.hxr.springrediskafka.entity.RedisUser;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@ConditionalOnSystemProperty(name = "mode", value = "Prod")
 public class RedisServiceImpl implements RedisService {
 
     @Resource(name = "redisTemplate")
@@ -75,6 +77,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Map<String, Object> loginUserLock(String name) {
+        System.out.println(serviceName);
         Map<String, Object> map = new HashMap();
         String key = RedisUser.getLoginTimeLock(name);
         if (template.hasKey(key)) {
