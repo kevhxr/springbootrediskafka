@@ -16,12 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@ConditionalOnSystemProperty(name = "mode", value = "Prod")
+@ConditionalOnSystemProperty(name = "mode", value = "test")
 @EnableKafka
 public class KafKaProducerConfig {
 
     @Value("${kafka.bootstartpservers}")
     private String bootStrapServers;
+
+    public static final String KAFKASENDER_BEAN="kafkaSender";
 
 
     @Bean
@@ -44,7 +46,7 @@ public class KafKaProducerConfig {
         return configmap;
     }
 
-    @Bean
+    @Bean(KAFKASENDER_BEAN)
     public KafkaSender kafkaSender(){
         return new KafkaSender();
     }

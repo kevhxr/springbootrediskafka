@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Configuration
 @EnableKafka
-@ConditionalOnSystemProperty(name = "mode", value = "Prod")
+//@ConditionalOnSystemProperty(name = "mode", value = "Prod")
 public class KafKaConsumerConfig {
 
     @Value("${kafka.bootstartpservers}")
@@ -44,7 +44,7 @@ public class KafKaConsumerConfig {
         configMap.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "3000");
         configMap.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10");
 
-        //configMap.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        configMap.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 
         return configMap;
     }
@@ -53,7 +53,7 @@ public class KafKaConsumerConfig {
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory();
         factory.setConsumerFactory(consumerFactory());
-        factory.setConcurrency(1);
+        factory.setConcurrency(12);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.setBatchListener(true);
         return factory;

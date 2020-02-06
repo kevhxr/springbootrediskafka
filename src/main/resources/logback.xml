@@ -15,10 +15,10 @@
         </encoder>
     </appender>
 
+    <logger name="org.apache.kafka.clients" level="OFF"/>
 
     <root level="info">
         <appender-ref ref="CONSOLE" />
     </root>
-
 
 </configuration>

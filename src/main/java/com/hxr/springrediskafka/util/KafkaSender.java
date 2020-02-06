@@ -19,4 +19,10 @@ public class KafkaSender {
         logger.info("start send {} to topic {}", payLoad, TOPIC);
         kafkaTemplate.send(TOPIC, payLoad);
     }
+
+
+    public void send(String payLoad, String topic) {
+        logger.info("start send {} to topic {}", payLoad, topic);
+        kafkaTemplate.send(topic, payLoad);
+    }
 }

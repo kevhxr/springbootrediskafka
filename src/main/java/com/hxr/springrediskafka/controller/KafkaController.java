@@ -2,6 +2,7 @@ package com.hxr.springrediskafka.controller;
 
 
 import com.hxr.springrediskafka.config.ConditionalOnSystemProperty;
+import com.hxr.springrediskafka.service.msgflow.MsgHandlerService;
 import com.hxr.springrediskafka.util.KafkaSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/kafka")
-@ConditionalOnSystemProperty(name = "mode", value = "Prod")
+@ConditionalOnSystemProperty(name = "mode", value = "test")
 public class KafkaController {
 
     @Autowired
@@ -19,6 +20,10 @@ public class KafkaController {
     @ResponseBody
     @RequestMapping("/produce")
     public void sendData(){
-        sender.send("heyImkevin");
+
+        for (int i = 0; i <20 ; i++) {
+
+            sender.send("hh"+i, MsgHandlerService.MSG_TOPIC);
+        }
     }
 }
