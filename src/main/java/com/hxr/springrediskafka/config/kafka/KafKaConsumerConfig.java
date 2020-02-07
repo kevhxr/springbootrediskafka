@@ -1,4 +1,4 @@
-package com.hxr.springrediskafka.config;
+package com.hxr.springrediskafka.config.kafka;
 
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -41,8 +41,10 @@ public class KafKaConsumerConfig {
         configMap.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configMap.put(ConsumerConfig.GROUP_ID_CONFIG, "batch");
         configMap.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-        configMap.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "3000");
+        //configMap.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "3000");
+        configMap.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,"1000");
         configMap.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10");
+        configMap.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, "2");
 
         configMap.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 
@@ -53,8 +55,8 @@ public class KafKaConsumerConfig {
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory();
         factory.setConsumerFactory(consumerFactory());
-        factory.setConcurrency(12);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.setConcurrency(2);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         factory.setBatchListener(true);
         return factory;
     }

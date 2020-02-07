@@ -1,4 +1,4 @@
-package com.hxr.springrediskafka.config;
+package com.hxr.springrediskafka.config.annotation;
 
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;

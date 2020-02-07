@@ -1,4 +1,4 @@
-package com.hxr.springrediskafka.config;
+package com.hxr.springrediskafka.config.database;
 
 import com.microsoft.sqlserver.jdbc.SQLServerDriver;
 import com.zaxxer.hikari.HikariDataSource;

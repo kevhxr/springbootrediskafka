@@ -1,4 +1,4 @@
-package com.hxr.springrediskafka.config;
+package com.hxr.springrediskafka.config.database;
 
 
 import org.apache.ibatis.session.SqlSessionFactory;

@@ -1,4 +1,4 @@
-package com.hxr.springrediskafka.entity;
+package com.hxr.springrediskafka.entity.event;
 
 import org.springframework.context.ApplicationEvent;
 

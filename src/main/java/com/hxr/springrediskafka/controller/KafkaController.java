@@ -1,7 +1,7 @@
 package com.hxr.springrediskafka.controller;
 
 
-import com.hxr.springrediskafka.config.ConditionalOnSystemProperty;
+import com.hxr.springrediskafka.config.annotation.ConditionalOnSystemProperty;
 import com.hxr.springrediskafka.service.msgflow.MsgHandlerService;
 import com.hxr.springrediskafka.util.KafkaSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class KafkaController {
 
         for (int i = 0; i <20 ; i++) {
 
-            sender.send("hh"+i, MsgHandlerService.MSG_TOPIC);
+            sender.send(""+i, MsgHandlerService.MSG_TOPIC);
         }
     }
 }

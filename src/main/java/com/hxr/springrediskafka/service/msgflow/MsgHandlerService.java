@@ -1,7 +1,7 @@
 package com.hxr.springrediskafka.service.msgflow;
 
-import com.hxr.springrediskafka.config.ConditionalOnSystemProperty;
-import com.hxr.springrediskafka.config.KafKaProducerConfig;
+import com.hxr.springrediskafka.config.annotation.ConditionalOnSystemProperty;
+import com.hxr.springrediskafka.config.kafka.KafKaProducerConfig;
 import com.hxr.springrediskafka.util.KafkaSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +43,11 @@ public class MsgHandlerService {
                 e.printStackTrace();
             }
             int randInt = random.nextInt(3);
-            if (randInt > 1) {
+/*            if (randInt > 1) {
                 logger.info("[Producer] produce new msg: {}", msg);
                 kafkaSender.send("" + msg, MSG_TOPIC);
                 msg++;
-            }
+            }*/
         }
     }
 

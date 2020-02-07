@@ -1,10 +1,8 @@
 package com.hxr.springrediskafka.service;
 
-import com.hxr.springrediskafka.config.ConditionalOnSystemProperty;
-import com.hxr.springrediskafka.config.DBConfig;
+import com.hxr.springrediskafka.config.database.DBConfig;
 import com.hxr.springrediskafka.entity.UserBean;
 import com.hxr.springrediskafka.mapper.UserMapper;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,9 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     public UserServiceImpl() {
-        System.out.println("Im been constructed");
+
+        logger.debug("debug Im been constructed");
+        logger.info("info Im been constructed");
     }
 
     @Resource(name = DBConfig.PTM_BEAN_NAME)

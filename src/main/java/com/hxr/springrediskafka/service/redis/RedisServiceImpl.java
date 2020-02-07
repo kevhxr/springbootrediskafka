@@ -1,6 +1,6 @@
 package com.hxr.springrediskafka.service.redis;
 
-import com.hxr.springrediskafka.config.ConditionalOnSystemProperty;
+import com.hxr.springrediskafka.config.annotation.ConditionalOnSystemProperty;
 import com.hxr.springrediskafka.entity.RedisUser;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;

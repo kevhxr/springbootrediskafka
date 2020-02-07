@@ -1,6 +1,7 @@
-package com.hxr.springrediskafka.config;
+package com.hxr.springrediskafka.config.kafka;
 
 
+import com.hxr.springrediskafka.config.annotation.ConditionalOnSystemProperty;
 import com.hxr.springrediskafka.util.KafkaSender;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

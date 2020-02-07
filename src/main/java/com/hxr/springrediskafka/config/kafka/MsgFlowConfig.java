@@ -1,4 +1,4 @@
-package com.hxr.springrediskafka.config;
+package com.hxr.springrediskafka.config.kafka;
 
 import com.hxr.springrediskafka.util.ExecutorPoolUtil;
 import org.springframework.context.annotation.Bean;

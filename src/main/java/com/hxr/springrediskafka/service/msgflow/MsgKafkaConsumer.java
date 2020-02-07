@@ -1,9 +1,9 @@
 package com.hxr.springrediskafka.service.msgflow;
 
-import com.hxr.springrediskafka.entity.MsgFlowEvent;
+import com.hxr.springrediskafka.config.annotation.ConditionalOnSystemProperty;
+import com.hxr.springrediskafka.entity.event.MsgFlowEvent;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,27 +12,36 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+
+/**
+ * KafkaMessageListenerContainer #invokeBatchOnMessage
+ * BatchMessagingMessageListenerAdapter #onmessage#invoke
+ * MessagingMessageListenerAdapter #invokeHandler
+ */
 
 @Component
 @DependsOn(value = {"eodMsgExecutor", "regularMsgExecutor"})
+@ConditionalOnSystemProperty(name = "mode", value = "test")
 public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<MsgFlowEvent> {
 
     Logger logger = LoggerFactory.getLogger(MsgKafkaConsumer.class);
     private AtomicLong savedOffset = new AtomicLong(0);
     private AtomicBoolean eodSowSwitcher = new AtomicBoolean(false);
-    Object lock = new Object();
+    private ReentrantLock marketLock = new ReentrantLock();
+    private Condition conditionEOD = marketLock.newCondition();
     Queue<Integer> msgQueue = new LinkedBlockingQueue<>();
+    Set<Integer> msgSet = new TreeSet<>();
 
     @Resource(name = "eodMsgExecutor")
     private ExecutorService eodMsgExecutor;
@@ -45,98 +54,84 @@ public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<
     @KafkaListener(
             topicPartitions =
             @org.springframework.kafka.annotation.TopicPartition(
-                    topic = MsgHandlerService.MSG_TOPIC, partitions = {"0", "1"}))
-    public synchronized void getMessageFromKafka(
-            List<ConsumerRecord<?, ?>> recordList,
-            Consumer consumer,
-            Acknowledgment ack) {
+                    topic = MsgHandlerService.MSG_TOPIC, partitions = {"0"}))
+    public void getMessageFromKafka01(List<ConsumerRecord<?, ?>> recordList, Consumer consumer, Acknowledgment ack) {
+        handleMsgFromKafka(1, recordList, consumer, ack);
+    }
 
+    @KafkaListener(
+            topicPartitions =
+            @org.springframework.kafka.annotation.TopicPartition(
+                    topic = MsgHandlerService.MSG_TOPIC, partitions = {"1"}))
+    public void getMessageFromKafka02(List<ConsumerRecord<?, ?>> recordList, Consumer consumer, Acknowledgment ack) {
+        handleMsgFromKafka(2, recordList, consumer, ack);
+    }
+
+    private void handleMsgFromKafka(int handlerNo, List<ConsumerRecord<?, ?>> recordList, Consumer consumer, Acknowledgment ack) {
         for (ConsumerRecord record : recordList) {
             try {
                 if (savedOffset.get() == 0) {
                     savedOffset.set(record.offset());
                 }
+/*                if (CommonUtil.generateFailCase()) {
+                    throw new Exception("message process failed " + record.value());
+                }*/
                 int value = Integer.parseInt(String.valueOf(record.value()));
                 if (value >= 0 && !eodSowSwitcher.get()) {
-                    logger.info("[{}] Partition {} received data {} off {}",
-                            record.topic(),
-                            record.partition(), value, record.offset());
-                    processMessage(value);
+                    logger.info("[{}] Partition {} received data {} off {}", record.topic(), record.partition(), value, record.offset());
+                    processMessage(value, handlerNo);
                     ack.acknowledge();
-                    savedOffset.set(savedOffset.get() + 1);
+                    savedOffset.getAndIncrement();
                 } else {
-                    consumer.seek(new org.apache.kafka.common.TopicPartition(
-                            MsgHandlerService.MSG_TOPIC,
-                            record.partition()), savedOffset.get());
-/*                    while (eodSowSwitcher.get()) {
-                        consumer.seek(new org.apache.kafka.common.TopicPartition(
-                                MsgHandlerService.MSG_TOPIC,
-                                record.partition()), savedOffset.get()-1);
-                        this.wait();
-                    }*/
+                    holdEod(value, ack, handlerNo);
                 }
             } catch (Exception e) {
+                consumer.seek(new org.apache.kafka.common.TopicPartition(
+                        MsgHandlerService.MSG_TOPIC,
+                        record.partition()), savedOffset.get());
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e1) {
+                    logger.error(e1.toString());
+                }
                 logger.error(e.toString());
             }
         }
     }
 
-/*    @KafkaListener(topicPartitions = {
-            @org.springframework.kafka.annotation.TopicPartition(
-                    topic = MsgHandlerService.MSG_TOPIC, partitions = {"0", "1"})})
-    public void getMessageKafka(
-            List<String> dataList,
-            List<ConsumerRecord<?, ?>> recordList,
-            @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
-            @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-            @Header(KafkaHeaders.OFFSET) int offset,
-            Consumer consumer,
-            Acknowledgment ack
-    ) {
-        for (String data : dataList) {
-            try {
-                if (savedOffset == 0) {
-                    savedOffset = offset;
-                }
-                int value = Integer.parseInt(data);
-                if (value >= 0 && !eodSowSwitcher.get()) {
-                    logger.info("[{}] P: {} received data {} off {}",
-                            topic, partition, value, offset);
-                    processMessage(value);
-                    ack.acknowledge();
-                    savedOffset++;
-                } else {
-                    synchronized (lock) {
-                        while (eodSowSwitcher.get()) {
-                            consumer.seek(new org.apache.kafka.common.TopicPartition(
-                                    MsgHandlerService.MSG_TOPIC,
-                                    partition), savedOffset);
-                            lock.wait();
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                logger.error(e.toString());
+    private void holdEod(int value, Acknowledgment ack, int handlerNo) {
+        eodSowSwitcher.set(true);
+        processMessage(value, handlerNo);
+        ack.acknowledge();
+        savedOffset.getAndIncrement();
+        try {
+            marketLock.lock();
+            while (eodSowSwitcher.get()) {
+                conditionEOD.await();
             }
+        } catch (InterruptedException e) {
+            logger.error(e.toString());
+        } finally {
+            marketLock.unlock();
         }
-    }*/
+    }
 
-    public void processMessage(int msgVal) {
+    public void processMessage(int msgVal, int handlerNo) {
         if (!eodSowSwitcher.get()) {
-            //int msgVal = msgQueue.remove();
             if (msgVal < 0) {
-                logger.info("[E-Con] EOD message reached {}", msgVal);
+                logger.info("[E-Con] EOD message reached {} ", msgVal);
                 eodSowSwitcher.set(true);
-                processEodMsg(msgVal);
+                processEodMsg(msgVal, handlerNo);
             } else {
-                logger.info("[R-Con] Regular message reached {}", msgVal);
-                processRegularMsg(msgVal);
+                logger.info("[R-Con] Regular message reached {} by {}", msgVal, handlerNo);
+                processRegularMsg(msgVal, handlerNo);
             }
         }
     }
 
-    private void processEodMsg(int msgType) {
+    private void processEodMsg(int msgType, int handlerNo) {
         if (!eodMsgExecutor.isShutdown()) {
+            logger.info("EOD reach, stop receiver");
             eodMsgExecutor.submit(() -> {
                 try {
                     Thread.sleep(500);
@@ -144,12 +139,13 @@ public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<
                     e.printStackTrace();
                 }
                 msgQueue.add(msgType);
-                logger.info("[E-Con] finish process EOD Msg: {}", msgType);
+                msgSet.add(msgType);
+                logger.info("[E-Con] finish process EOD Msg: {} by {}", msgType, handlerNo);
             });
         }
     }
 
-    private void processRegularMsg(int msgType) {
+    private void processRegularMsg(int msgType, int handlerNo) {
         if (!regularMsgExecutor.isShutdown()) {
             regularMsgExecutor.submit(() -> {
                 try {
@@ -158,7 +154,8 @@ public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<
                     e.printStackTrace();
                 }
                 msgQueue.add(msgType);
-                logger.info("[R-Con] finish process Regular Msg: {}", msgType);
+                msgSet.add(msgType);
+                logger.info("[R-Con] finish process Regular Msg: {} by {}", msgType, handlerNo);
             });
         }
     }
@@ -179,10 +176,15 @@ public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<
         }
     }
 
-    private synchronized void wakeBySow() {
-        logger.info("SOW reach, recover receiver");
-        eodSowSwitcher.set(false);
-        this.notifyAll();
+    private void wakeBySow() {
+        try {
+            marketLock.lock();
+            logger.info("SOW reach, recover receiver");
+            eodSowSwitcher.set(false);
+            conditionEOD.signalAll();
+        } finally {
+            marketLock.unlock();
+        }
     }
 
     private void eodReached() {
@@ -196,5 +198,6 @@ public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<
         this.eodMsgExecutor.shutdown();
         this.regularMsgExecutor.shutdown();
         msgQueue.forEach(q -> System.out.print(q + ","));
+        msgSet.forEach(q -> System.out.print(q + ","));
     }
 }

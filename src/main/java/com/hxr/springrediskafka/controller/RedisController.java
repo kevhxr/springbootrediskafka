@@ -1,6 +1,6 @@
 package com.hxr.springrediskafka.controller;
 
-import com.hxr.springrediskafka.config.ConditionalOnSystemProperty;
+import com.hxr.springrediskafka.config.annotation.ConditionalOnSystemProperty;
 import com.hxr.springrediskafka.entity.RedisUser;
 import com.hxr.springrediskafka.service.redis.RedisServiceImpl;
 import org.slf4j.Logger;
