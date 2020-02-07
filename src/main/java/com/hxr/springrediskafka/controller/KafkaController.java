@@ -26,4 +26,14 @@ public class KafkaController {
             sender.send(""+i, MsgHandlerService.MSG_TOPIC);
         }
     }
+
+    @ResponseBody
+    @RequestMapping("/trade")
+    public void sendTradeMsg(){
+
+        for (int i = 0; i <2 ; i++) {
+
+            sender.sendJson("msgtp03");
+        }
+    }
 }

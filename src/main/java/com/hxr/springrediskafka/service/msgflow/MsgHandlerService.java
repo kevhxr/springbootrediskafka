@@ -12,7 +12,7 @@ import javax.annotation.Resource;
 import java.util.Random;
 
 @Service
-@ConditionalOnSystemProperty(name = "mode", value = "test")
+@ConditionalOnSystemProperty(name = "mode", value = "Prod")
 public class MsgHandlerService {
 
     Logger logger = LoggerFactory.getLogger(MsgHandlerService.class);
