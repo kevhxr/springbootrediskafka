@@ -11,6 +11,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,54 +23,75 @@ import java.util.concurrent.Executors;
 @ConditionalOnSystemProperty(name = "mode", value = "test")
 public class PureKafkaReceiver {
 
+    public static final String TOPIC_SWAP = "msgtp02";
+    public static final String TOPIC_CASHFLOW = "msgtp03";
+    private boolean shouldStop = false;
+
     @Autowired
     ConsumerFactory consumerFactory;
 
     ConcurrentHashMap<String, Long> offsetMap = new ConcurrentHashMap<>();
+    ExecutorService executorService = Executors.newFixedThreadPool(1);
+
+    @PreDestroy
+    public void destroy() {
+        shouldStop = true;
+        executorService.shutdown();
+    }
 
     @PostConstruct
     public void startUp() {
-        ExecutorService executorService = Executors.newFixedThreadPool(12);
         executorService.submit(this::listenFromTopics);
     }
 
     public void listenFromTopics() {
         Consumer consumer = consumerFactory.createConsumer();
         List<String> topics = new ArrayList<>();
-        topics.add("msgtp02");
-        topics.add("msgtp03");
+        topics.add(TOPIC_SWAP);
+        topics.add(TOPIC_CASHFLOW);
         consumer.subscribe(topics);
 
-        while (true) {
+        while (shouldStop) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(1));
             for (ConsumerRecord record : records) {
-                String key = record.topic() + record.partition();
+                String topic = record.topic();
+                String key = topic + record.partition();
                 Long newOffSet = record.offset();
-                //System.out.println("receive:  " + record.topic() + ",p:" + record.partition() + ",v:" + record.value() + ",o:" + newOffSet + "/" + offsetMap.get(key));
+                //System.out.println("receive new msg:  " + topic + ",p:" + record.partition() + ",v:" + record.value() + ",o:" + newOffSet + "/" + offsetMap.get(key));
                 if (offsetMap.get(key) != null && newOffSet > offsetMap.get(key)) {
-                    //System.out.println("not process as " + newOffSet + "/" + offsetMap.get(key));
+                    //System.out.println("not process due to offset diff " + newOffSet + "/" + offsetMap.get(key));
                     continue;
                 }
                 try {
                     if (!offsetMap.containsKey(key)) {
                         offsetMap.put(key, newOffSet);
                     }
-                    if (CommonUtil.generateFailCase()) {
-                        throw new Exception("message process failed " + record.value());
+                    switch (topic) {
+                        case TOPIC_SWAP:
+                            processSwapMsg(record.value());
+                            if (CommonUtil.generateFailCase()) {
+                                throw new Exception("swap message process failed " + record.value());
+                            }
+                            break;
+                        case TOPIC_CASHFLOW:
+                            processCashFlowMsg(record.value());
+                            if (CommonUtil.generateFailCase()) {
+                                throw new Exception("cashFlow message process failed " + record.value());
+                            }
+                            break;
                     }
-
-                    //System.out.println("processed:  " + record.topic() + ",p:" + record.partition() + ",v:" + record.value() + ",o:" + newOffSet + "/" + offsetMap.get(key));
-
-                    offsetMap.put(key, newOffSet + 1);
                     consumer.commitSync();
+                    offsetMap.put(key, newOffSet + 1);
+                    //System.out.println("processed done:  " + topic + ",p:" + record.partition() + ",v:" + record.value() + ",o:" + newOffSet + "/" + offsetMap.get(key));
+
 
                 } catch (Exception e) {
 
-                    //System.out.println("error:  " + record.topic() + ",p:" + record.partition() + ",v:" + record.value() + ",o:" + newOffSet + "/" + offsetMap.get(key));
+                    //System.out.println("has error:  " + topic + ",p:" + record.partition() + ",v:" + record.value() + ",o:" + newOffSet + "/" + offsetMap.get(key));
 
                     offsetMap.put(key, newOffSet);
                     consumer.seek(new org.apache.kafka.common.TopicPartition(
-                                    record.topic(),
+                                    topic,
                                     record.partition()),
                             offsetMap.get(key));
                     try {
@@ -78,10 +100,23 @@ public class PureKafkaReceiver {
                         e1.printStackTrace();
                     }
 
-                    //System.out.println("error done:  " + record.topic() + ",p:" + record.partition() + ",v:" + record.value() + ",o:" + newOffSet + "/" + offsetMap.get(key));
+                    //System.out.println("error done:  " + topic + ",p:" + record.partition() + ",v:" + record.value() + ",o:" + newOffSet + "/" + offsetMap.get(key));
                 }
             }
-
         }
+    }
+
+
+    public void processSwapMsg(Object value) {
+        /**
+         * todo
+         */
+    }
+
+
+    public void processCashFlowMsg(Object value) {
+        /**
+         * todo
+         */
     }
 }
