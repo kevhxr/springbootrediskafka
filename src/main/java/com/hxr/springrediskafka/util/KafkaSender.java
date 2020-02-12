@@ -14,7 +14,7 @@ public class KafkaSender {
     private static final String TOPIC = "tp01";
 
     Logger logger = LoggerFactory.getLogger(KafkaSender.class);
-
+/*
     @Autowired
     KafkaTemplate<Integer, String> kafkaTemplate;
 
@@ -37,5 +37,5 @@ public class KafkaSender {
         String json = JSON.toJSONString(tradeMsg);
         logger.info("start send {} to topic {}", json, topic);
         kafkaTemplate.send(topic, randInt, json);
-    }
+    }*/
 }

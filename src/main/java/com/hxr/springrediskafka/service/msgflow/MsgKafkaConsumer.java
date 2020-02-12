@@ -2,6 +2,7 @@ package com.hxr.springrediskafka.service.msgflow;
 
 import com.hxr.springrediskafka.config.annotation.ConditionalOnSystemProperty;
 import com.hxr.springrediskafka.entity.event.MsgFlowEvent;
+import com.hxr.springrediskafka.util.CommonUtil;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -14,8 +15,10 @@ import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 @DependsOn(value = {"eodMsgExecutor", "regularMsgExecutor"})
-@ConditionalOnSystemProperty(name = "mode", value = "Prod")
+@ConditionalOnSystemProperty(name = "mode", value = "prod")
 public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<MsgFlowEvent> {
 
     Logger logger = LoggerFactory.getLogger(MsgKafkaConsumer.class);
@@ -42,6 +45,7 @@ public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<
     private Condition conditionEOD = marketLock.newCondition();
     Queue<Integer> msgQueue = new LinkedBlockingQueue<>();
     Set<Integer> msgSet = new TreeSet<>();
+    ConcurrentHashMap<String, Long> offsetMap = new ConcurrentHashMap<>();
 
     @Resource(name = "eodMsgExecutor")
     private ExecutorService eodMsgExecutor;
@@ -51,11 +55,56 @@ public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<
     @Autowired
     MsgHandlerService msgHandlerService;
 
-    @KafkaListener(
+    @PostConstruct
+    public void postConstruct() {
+        System.out.println("tt: " + Thread.currentThread().getName());
+    }
+
+    @KafkaListener(topics = {"msgtp02", "msgtp03"})
+    public void getMutipleTopic(List<ConsumerRecord<?, ?>> recordList, Acknowledgment ack, Consumer consumer) {
+        for (ConsumerRecord record : recordList) {
+            String key = record.topic() + record.partition();
+            Long newOffSet = record.offset();
+            System.out.println("receive:  "+record.topic()+",p:"+record.partition()+",v:"+record.value()+",o:"+record.offset()+"/"+newOffSet);
+            //logger.info("{},p{},v{}", record.topic(), record.partition(), record.value());
+            try {
+                if (!offsetMap.containsKey(key)) {
+                    offsetMap.put(key, newOffSet);
+                }
+                if (CommonUtil.generateFailCase()) {
+                    throw new Exception("message process failed " + record.value());
+                }
+
+                System.out.println("processed:  "+record.topic()+",p:"+record.partition()+",v:"+record.value()+",o:"+record.offset()+"/"+newOffSet);
+                //logger.info("{},p{},v{}", record.topic(), record.partition(), record.value());
+                offsetMap.put(key, newOffSet + 1);
+                ack.acknowledge();
+            } catch (Exception e) {
+
+                System.out.println("error:  "+record.topic()+",p:"+record.partition()+",v:"+record.value()+",o:"+record.offset()+"/"+newOffSet);
+                //logger.error("error {},p{},v{}", record.topic(), record.partition(), record.value());
+                offsetMap.put(key, newOffSet);
+                consumer.seek(new org.apache.kafka.common.TopicPartition(
+                                record.topic(),
+                                record.partition()),
+                        offsetMap.get(key));
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+                System.out.println("error done:  "+record.topic()+",p:"+record.partition()+",v:"+record.value()+",o:"+record.offset()+"/"+newOffSet);
+
+            }
+        }
+    }
+
+/*    @KafkaListener(
             topicPartitions =
             @org.springframework.kafka.annotation.TopicPartition(
                     topic = MsgHandlerService.MSG_TOPIC, partitions = {"0"}))
     public void getMessageFromKafka01(List<ConsumerRecord<?, ?>> recordList, Consumer consumer, Acknowledgment ack) {
+        System.out.println("getMessageFromKafka01: "+Thread.currentThread().getName());
         handleMsgFromKafka(1, recordList, consumer, ack);
     }
 
@@ -64,8 +113,9 @@ public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<
             @org.springframework.kafka.annotation.TopicPartition(
                     topic = MsgHandlerService.MSG_TOPIC, partitions = {"1"}))
     public void getMessageFromKafka02(List<ConsumerRecord<?, ?>> recordList, Consumer consumer, Acknowledgment ack) {
+        System.out.println("getMessageFromKafka02: "+Thread.currentThread().getName());
         handleMsgFromKafka(2, recordList, consumer, ack);
-    }
+    }*/
 
     private void handleMsgFromKafka(int handlerNo, List<ConsumerRecord<?, ?>> recordList, Consumer consumer, Acknowledgment ack) {
         for (ConsumerRecord record : recordList) {
@@ -162,6 +212,7 @@ public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<
 
     @Override
     public void onApplicationEvent(MsgFlowEvent msgFlowEvent) {
+        System.out.println("onApplicationEvent: " + Thread.currentThread().getName());
         String eventType = msgFlowEvent.getSource().toString();
         switch (eventType) {
             case MsgFlowEvent.SOW_EVENT:

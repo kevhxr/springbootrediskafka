@@ -11,6 +11,9 @@ public class ExceptionTest {
     public static void main(String[] args) {
         try {
 
+            TreeSet<Integer> a1= new TreeSet<>();
+            a1.add(1);
+
             int a = 4;
             System.out.println(a >> 1);
             List<Integer> copy = new ArrayList<>();

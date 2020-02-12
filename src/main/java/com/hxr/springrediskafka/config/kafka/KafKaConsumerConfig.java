@@ -21,14 +21,14 @@ import java.util.Map;
 
 @Configuration
 @EnableKafka
-@ConditionalOnSystemProperty(name = "mode", value = "Prod")
+@ConditionalOnSystemProperty(name = "mode", value = "test")
 public class KafKaConsumerConfig {
 
     @Value("${kafka.bootstartpservers}")
     private String bootStrapServers;
 
 
-    @Bean
+    @Bean(value = "consumerFactory")
     public ConsumerFactory<String, String> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfig());
     }
@@ -43,7 +43,7 @@ public class KafKaConsumerConfig {
         configMap.put(ConsumerConfig.GROUP_ID_CONFIG, "batch");
         configMap.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         //configMap.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "3000");
-        configMap.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,"1000");
+        configMap.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,"10000");
         configMap.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10");
         configMap.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, "2");
 

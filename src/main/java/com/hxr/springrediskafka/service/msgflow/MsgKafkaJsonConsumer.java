@@ -15,7 +15,7 @@ import java.util.List;
 
 
 @Component
-@ConditionalOnSystemProperty(name = "mode", value = "test")
+@ConditionalOnSystemProperty(name = "mode", value = "prod")
 public class MsgKafkaJsonConsumer {
 
 
@@ -27,6 +27,7 @@ public class MsgKafkaJsonConsumer {
             @org.springframework.kafka.annotation.TopicPartition(
                     topic = TRADE_TOPIC, partitions = {"0"}))
     public void getMessageFromKafka01(List<ConsumerRecord<Integer, String>> recordList, Consumer consumer, Acknowledgment ack) {
+
         processMessage(1, recordList, ack);
     }
 

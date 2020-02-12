@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/kafka")
-@ConditionalOnSystemProperty(name = "mode", value = "test")
+@ConditionalOnSystemProperty(name = "mode", value = "dd")
 public class KafkaController {
 
     @Autowired
     KafkaSender sender;
 
-    @ResponseBody
+/*    @ResponseBody
     @RequestMapping("/produce")
     public void sendData(){
 
@@ -35,5 +35,5 @@ public class KafkaController {
 
             sender.sendJson("msgtp03");
         }
-    }
+    }*/
 }
