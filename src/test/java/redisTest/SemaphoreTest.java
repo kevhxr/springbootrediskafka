@@ -8,45 +8,50 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class SemaphoreTest {
 
-
+    public int a = 0;
     Semaphore semaphore = new Semaphore(0);
+
+    public ReentrantLock lock = new ReentrantLock();
+
 
     public static void main(String[] args) throws InterruptedException {
         SemaphoreTest semaphoreTest = new SemaphoreTest();
         ExecutorService executorService = Executors.newFixedThreadPool(5);
-        executorService.submit(() -> semaphoreTest.doTest(1));
-        executorService.submit(() -> semaphoreTest.doRelease());
-
+/*        executorService.submit(() -> semaphoreTest.third());
+        executorService.submit(() -> semaphoreTest.second());
+        executorService.submit(() -> semaphoreTest.first());*/
+        System.out.println(3%2);
         executorService.shutdown();
     }
 
-    public void doTest(int a) {
-        while(true) {
-            System.out.println("start!!!" + a);
-            try {
-                semaphore.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("done!!!" + a);
-
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+    public void first(){
+        System.out.println(1);
+        semaphore.release();
+        a = 1;
     }
 
-
-    public void doRelease() {
-
+    public void second(){
+        while(a != 1) {
+        }
         try {
-            Thread.sleep(2000);
+            semaphore.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println(2);
         semaphore.release();
-        System.out.println("release!!!");
+        a = 2;
+    }
+
+    public void third(){
+        while(a != 2) {
+        }
+
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(3);
     }
 }

@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 @DependsOn(value = {"eodMsgExecutor", "regularMsgExecutor"})
-@ConditionalOnSystemProperty(name = "mode", value = "prod")
+@ConditionalOnSystemProperty(name = "mode", value = "kafka")
 public class MsgKafkaConsumer implements ConsumerSeekAware, ApplicationListener<MsgFlowEvent> {
 
     Logger logger = LoggerFactory.getLogger(MsgKafkaConsumer.class);

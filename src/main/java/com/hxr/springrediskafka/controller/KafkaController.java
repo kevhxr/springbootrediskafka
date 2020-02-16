@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/kafka")
-@ConditionalOnSystemProperty(name = "mode", value = "dd")
+@ConditionalOnSystemProperty(name = "mode", value = "kafka")
 public class KafkaController {
 
     @Autowired

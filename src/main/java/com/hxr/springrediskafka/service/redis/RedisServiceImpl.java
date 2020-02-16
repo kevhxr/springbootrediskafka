@@ -2,20 +2,35 @@ package com.hxr.springrediskafka.service.redis;
 
 import com.hxr.springrediskafka.config.annotation.ConditionalOnSystemProperty;
 import com.hxr.springrediskafka.entity.RedisUser;
+import com.hxr.springrediskafka.entity.UserBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@ConditionalOnSystemProperty(name = "mode", value = "Prod")
+@ConditionalOnSystemProperty(name = "mode", value = "redis")
 public class RedisServiceImpl implements RedisService {
 
     @Resource(name = "redisTemplate")
     RedisTemplate template;
+
+    @Resource(name = "redisTemplate")
+    HashOperations<String, Integer, UserBean> hashOps;
+
+    @Resource(name = "redisTemplate")
+    ListOperations<String, UserBean> listOps;
+
+    @Resource(name = "redisTemplate")
+    ListOperations<String, String> stringListOps;
 
     @Override
     public void addNewKey() {
@@ -27,6 +42,10 @@ public class RedisServiceImpl implements RedisService {
             System.out.println("store key first");
             template.opsForValue().set(key, "sdfgg");
         }
+    }
+
+    public void setTemplate(RedisTemplate template) {
+        this.template = template;
     }
 
     @Override
@@ -88,5 +107,60 @@ public class RedisServiceImpl implements RedisService {
             map.put("flag", false);
         }
         return map;
+    }
+
+    @Override
+    public void addHashUser(UserBean userBean) {
+        hashOps.put("user", userBean.getUserId(), userBean);
+    }
+
+    @Override
+    public void getHashUser(Integer id) {
+        UserBean user = hashOps.get("user", id);
+        if (user != null) {
+            System.out.println(user);
+        }
+    }
+
+    public void addListUesr(List<UserBean> users){
+        users.stream().forEach(user-> listOps.leftPush("userList",user));
+    }
+
+    public void addListString(String str){
+        stringListOps.leftPush("userList",str);
+    }
+
+    public void getListString(){
+        String userList = stringListOps.leftPop("userList");
+        System.out.println(userList);
+    }
+
+    public void getListUser(){
+        UserBean userList = listOps.leftPop("userList");
+        System.out.println(userList);
+    }
+
+    public void insertThenPop(){
+        template.setEnableTransactionSupport(true);
+        template.multi();
+        List exec = new ArrayList();
+        int a = 0;
+        ListOperations<String, Integer> vo = template.opsForList();
+        try{
+            vo.leftPush("mylist",12);
+            vo.leftPush("mylist",13);
+            vo.leftPop("mylist");
+            vo.leftPush("mylist",null);
+            if(a == 0) {
+                throw new Exception("sd");
+            }
+            exec = template.exec();
+        }catch (Exception e){
+            System.out.println(e.toString());
+            template.discard();
+        }
+        exec.forEach(result->{
+            System.out.println(result.toString());
+        });
     }
 }

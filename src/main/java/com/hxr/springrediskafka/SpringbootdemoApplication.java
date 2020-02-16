@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SpringbootdemoApplication {
 
     static {
-        System.setProperty("mode", "test");
+        System.setProperty("mode", "redis");
     }
 
     public static void main(String[] args) {

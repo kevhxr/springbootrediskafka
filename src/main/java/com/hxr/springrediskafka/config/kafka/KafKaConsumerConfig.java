@@ -21,7 +21,7 @@ import java.util.Map;
 
 @Configuration
 @EnableKafka
-@ConditionalOnSystemProperty(name = "mode", value = "test")
+@ConditionalOnSystemProperty(name = "mode", value = "kafka")
 public class KafKaConsumerConfig {
 
     @Value("${kafka.bootstartpservers}")

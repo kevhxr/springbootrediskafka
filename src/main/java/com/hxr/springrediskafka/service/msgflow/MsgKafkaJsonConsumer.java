@@ -15,7 +15,7 @@ import java.util.List;
 
 
 @Component
-@ConditionalOnSystemProperty(name = "mode", value = "prod")
+@ConditionalOnSystemProperty(name = "mode", value = "kafkaj")
 public class MsgKafkaJsonConsumer {
 
 

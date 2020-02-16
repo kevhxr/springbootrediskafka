@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@ConditionalOnSystemProperty(name = "mode", value = "test")
+@ConditionalOnSystemProperty(name = "mode", value = "kafka")
 @EnableKafka
 public class KafKaProducerConfig {
 

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@ConditionalOnSystemProperty(name = "mode", value = "Prod")
+@ConditionalOnSystemProperty(name = "mode", value = "kafka")
 @ConfigurationProperties(prefix = "kafka")
 public class KafkaReceiver implements ConsumerSeekAware {
 

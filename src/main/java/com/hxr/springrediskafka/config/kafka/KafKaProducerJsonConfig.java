@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@ConditionalOnSystemProperty(name = "mode", value = "ttt")
+@ConditionalOnSystemProperty(name = "mode", value = "kafkaj")
 @EnableKafka
 public class KafKaProducerJsonConfig {
 

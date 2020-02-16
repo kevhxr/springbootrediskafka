@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@ConditionalOnSystemProperty(name = "mode", value = "test")
+@ConditionalOnSystemProperty(name = "mode", value = "kafka")
 public class PureKafkaReceiver {
 
     Logger logger = LoggerFactory.getLogger(PureKafkaReceiver.class);

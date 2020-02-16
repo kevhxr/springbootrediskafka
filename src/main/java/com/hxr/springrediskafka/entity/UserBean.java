@@ -2,7 +2,7 @@ package com.hxr.springrediskafka.entity;
 
 import java.io.Serializable;
 
-public class UserBean implements Serializable {
+public class UserBean implements Serializable, Comparable {
 
     private static final long serialVersionUID = 7651429617189991228L;
     private String userName;
@@ -50,5 +50,10 @@ public class UserBean implements Serializable {
                 ", userAge=" + userAge +
                 ", userAlias='" + userAlias + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return 0;
     }
 }

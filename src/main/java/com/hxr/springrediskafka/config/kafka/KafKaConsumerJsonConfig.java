@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Configuration
 @EnableKafka
-@ConditionalOnSystemProperty(name = "mode", value = "Prod")
+@ConditionalOnSystemProperty(name = "mode", value = "kafkaj")
 public class KafKaConsumerJsonConfig {
 
     @Value("${kafka.bootstartpservers}")

@@ -2,6 +2,7 @@ package com.hxr.springrediskafka.controller;
 
 import com.hxr.springrediskafka.config.annotation.ConditionalOnSystemProperty;
 import com.hxr.springrediskafka.entity.RedisUser;
+import com.hxr.springrediskafka.entity.UserBean;
 import com.hxr.springrediskafka.service.redis.RedisServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/redis")
-@ConditionalOnSystemProperty(name = "mode", value = "Prod")
+@ConditionalOnSystemProperty(name = "mode", value = "redis")
 public class RedisController {
 
     private static final Logger logger = LoggerFactory.getLogger(DAOController.class);
@@ -28,6 +29,16 @@ public class RedisController {
     @RequestMapping(value = "/add")
     public void addToRedis() {
         redisService.addNewKey();
+    }
+
+    @RequestMapping(value = "/addhash")
+    public void addToRedisHash() {
+        UserBean userBean = new UserBean();
+        userBean.setUserAge(12);
+        userBean.setUserName("kevin");
+        userBean.setUserAlias("a1");
+        userBean.setUserId(1);
+        redisService.addHashUser(userBean);
     }
 
     @CrossOrigin
