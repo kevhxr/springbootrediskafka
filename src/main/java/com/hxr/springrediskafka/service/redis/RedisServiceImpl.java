@@ -7,13 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -23,8 +21,7 @@ public class RedisServiceImpl implements RedisService {
     @Resource(name = "redisTemplate")
     RedisTemplate template;
 
-    @Resource(name = "redisTemplate")
-    HashOperations<String, Integer, UserBean> hashOps;
+    HashOperations<String, Integer, UserBean> hashOps = template.opsForHash();
 
     @Resource(name = "redisTemplate")
     ListOperations<String, UserBean> listOps;
@@ -162,5 +159,25 @@ public class RedisServiceImpl implements RedisService {
         exec.forEach(result->{
             System.out.println(result.toString());
         });
+    }
+
+    public void doSet(){
+        SetOperations set = template.opsForSet();
+        set.add("A:followers","B");
+        set.add("A:followers","C");
+        set.add("B:followers","C");
+        set.add("B:followers","A");
+
+        Set intersect = set.intersect("A:followers", "B:followers");
+        Set difference = set.difference("A:followers", "B:followers");
+        Set union = set.union("A:followers", "B:followers");
+        String randomMember = (String) set.randomMember("A:followers");
+        intersect.stream().forEach(a-> System.out.println(a));
+        System.out.println("============");
+        difference.stream().forEach(a-> System.out.println(a));
+        System.out.println("============");
+        union.stream().forEach(a-> System.out.println(a));
+        System.out.println("============");
+        System.out.println(randomMember);
     }
 }

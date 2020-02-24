@@ -66,7 +66,7 @@ public class DBConfig extends AbstractDBConfig {
         return new DataSourceTransactionManager(dataSource);
     }
 
-    @Bean(SSF_BEAN_NAME)
+    //@Bean(SSF_BEAN_NAME)
     public SqlSessionFactory getSqlSessionFactory() throws Exception {
         SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
         Resource[] resources = getMapperResources(getMapperLocations());

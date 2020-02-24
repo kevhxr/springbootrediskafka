@@ -31,6 +31,11 @@ public class RedisController {
         redisService.addNewKey();
     }
 
+    @RequestMapping(value = "/set")
+    public void setTest() {
+        redisService.doSet();
+    }
+
     @RequestMapping(value = "/addhash")
     public void addToRedisHash() {
         UserBean userBean = new UserBean();

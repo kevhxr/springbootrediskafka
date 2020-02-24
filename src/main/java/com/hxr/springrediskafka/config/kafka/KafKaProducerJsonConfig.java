@@ -50,6 +50,7 @@ public class KafKaProducerJsonConfig {
         configmap.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,bootStrapServers);
         configmap.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
         configmap.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        configmap.put(ProducerConfig.BATCH_SIZE_CONFIG,"5");
         return configmap;
     }
 
